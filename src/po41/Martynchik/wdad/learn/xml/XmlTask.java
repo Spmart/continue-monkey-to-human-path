@@ -97,7 +97,9 @@ public class XmlTask {
         createDocument();   //Создаем дерево
     }
 
-    /**Создает дерево DOM*/
+    /**
+     * Cоздает дерево DOM
+     */
     private void createDocument() throws IOException, ParserConfigurationException, SAXException {
         File housekeeper = new File(path);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -106,7 +108,9 @@ public class XmlTask {
         this.housekeeper = builder.parse(housekeeper);
     }
 
-    /**Записывает тарифы из XML в соответствующие переменные*/
+    /**
+     * Записывает тарифы из XML в соответствующие переменные
+     */
     private void updateTariffs() {
         NamedNodeMap attributes = housekeeper.getElementsByTagName(TARIFF_TAG_NAME).item(0).getAttributes();
         coldWaterTariff = Integer.valueOf(attributes.getNamedItem(COLDWATER_TAG_NAME).getNodeValue());
@@ -115,7 +119,9 @@ public class XmlTask {
         gasTariff = Integer.valueOf(attributes.getNamedItem(GAS_ATTRIBUTE_NAME).getNodeValue());
     }
 
-    /**Возвращает сумму, которую должен заплатить абонент*/
+    /**
+     * Возвращает сумму, которую должен заплатить абонент
+     */
     public int getBill (String requiredStreet, int requiredBuildingNumber, int requiredFlatNumber) {
         int bill = 0;   //Если что-то пойдет не так, вернем этот ноль
         NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME);  //Получаем все домики
@@ -126,7 +132,9 @@ public class XmlTask {
         return bill;
     }
 
-    /**Возвращает здание по его номеру и названию улицы*/
+    /**
+     * Возвращает здание по его номеру и названию улицы
+     */
     private NodeList getFlatsFromBuilding(NodeList buildings, String requiredStreet, int requiredBuildingNumber){
         NodeList flats = null;
         int buildingsLength = buildings.getLength();
@@ -142,7 +150,9 @@ public class XmlTask {
         return flats;
     }
 
-    /**Возвращает показания для требуемой квартиры*/
+    /**
+     * Возвращает показания для требуемой квартиры
+     */
     private NodeList getRegistrationsFromFlat(NodeList flats, int requiredFlatNumber) {
         NodeList registrations = null;
         int flatsLength = flats.getLength();
@@ -157,7 +167,9 @@ public class XmlTask {
         return registrations;
     }
 
-    /**Возвращает показания за последний и предыдущий месяц*/
+    /**
+     * Возвращает показания за последний и предыдущий месяц
+     */
     private Registrations getActualRegistrations(NodeList allRegistrations) {
         Node lastRegistration = null;
         Node prevRegistration = null;
@@ -187,7 +199,10 @@ public class XmlTask {
         return requiredRegistrations;
     }
 
-    /**Подсчитывает показания, умножает на тариф и возвращает количество денег, которое нужно заплатить*/
+    /**
+     * Подсчитывает показания, умножает на тариф и возвращает
+     * количество денег, которое нужно заплатить
+     */
     private int calcBill(Registrations registrations) {
         updateTariffs();
         int coldWaterUsed = registrations.lastColdWaterRegistration - registrations.prevColdWaterRegistration;
@@ -198,7 +213,9 @@ public class XmlTask {
         return bill;
     }
 
-    /**Изменяет стоимость заданной единицы показания счетчика*/
+    /**
+     * Изменяет стоимость заданной единицы показания счетчика
+     */
     public void setTariff (String name, int value) throws IOException, TransformerException {
         NodeList tariffs = housekeeper.getElementsByTagName(TARIFF_TAG_NAME); //Получаем все элементы с тегом "tariff"
         NamedNodeMap attributes = tariffs.item(0).getAttributes();  //А такой у нас всего один
@@ -206,7 +223,9 @@ public class XmlTask {
         rewriteDocument();
     }
 
-    /**Перезаписывает документ*/
+    /**
+     * Перезаписывает документ
+     */
     private void rewriteDocument() throws TransformerException, IOException {
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
@@ -215,7 +234,9 @@ public class XmlTask {
         transformer.transform(domSource, streamResult);
     }
 
-    /**Добавляет показания счетчиков к заданной квартире в заданный период*/
+    /**
+     * Добавляет показания счетчиков к заданной квартире в заданный период
+     */
     public void addRegistration (String street, int buildingNumber, int flatNumber, int year, int month, int coldWaterValue, int hotWaterValue, int electricityValue, int gasValue) throws IOException, TransformerException {
         NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME); //Получаем все домики
         NodeList flats = getFlatsFromBuilding(buildings, street, buildingNumber); //Получаем все квартирки из нужного домика

@@ -1,5 +1,4 @@
 package po41.Martynchik.wdad.data.managers;
-
 import org.xml.sax.SAXException;
 import org.w3c.dom.*;
 import javax.xml.parsers.DocumentBuilder;
@@ -24,17 +23,25 @@ public class PreferencesManager {
     private static final String CLASS_PROVIDER_TAG_NAME = "classprovider";
     private static final String YES_TEXT_VALUE = "yes";
     private static final String NO_TEXT_VALUE = "no";
+    private static PreferencesManager instance;
 
-    /**РЎРѕР·РґР°РµС‚ РґРµСЂРµРІРѕ DOM*/
+    private PreferencesManager() throws IOException, ParserConfigurationException, SAXException{
+        createDocument();
+    }
+
+    public static PreferencesManager getInstance() throws ParserConfigurationException, IOException, SAXException {
+        if (instance == null) instance = new PreferencesManager();
+        return instance;
+    }
+
     private void createDocument() throws IOException, ParserConfigurationException, SAXException {
         File appconfig = new File(path);
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setIgnoringElementContentWhitespace(true); //Р’Р°Р¶РЅР°СЏ С€С‚СѓРєР°. РЎ РЅРµР№ РїР°СЂСЃРµСЂ РёРіРЅРѕСЂРёСЂСѓРµРј РїСЂРѕР±РµР»С‹.
+        factory.setIgnoringElementContentWhitespace(true);
         DocumentBuilder builder = factory.newDocumentBuilder();
         this.appconfig = builder.parse(appconfig);
     }
 
-    /**РџРµСЂРµР·Р°РїРёСЃС‹РІР°РµС‚ РґРѕРєСѓРјРµРЅС‚*/
     private void rewriteDocument() throws TransformerException, IOException {
         TransformerFactory factory = TransformerFactory.newInstance();
         Transformer transformer = factory.newTransformer();
