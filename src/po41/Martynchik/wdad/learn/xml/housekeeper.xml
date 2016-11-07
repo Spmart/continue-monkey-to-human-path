@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE housekeeper SYSTEM
+        "C:\Users\Spmart\Dropbox\Лабораторные работы\РВПРС на Java\wdad\src\po41\Martynchik\wdad\learn\xml\housekeeper.dtd">
+<housekeeper>
+    <tariffs coldwater="20" hotwater="50" electricity="4" gas="5"/>
+    <building street="somestreet" number="40" flatsquantity="2">
+        <flat number="1" personsquantity="2" area="50">
+            <registration month="1" year="2016">
+                <coldwater>3</coldwater>
+                <hotwater>4</hotwater>
+                <electricity>120</electricity>
+                <gas>4</gas>
+            </registration>
+            <registration month="2" year="2016">
+                <coldwater>8</coldwater>
+                <hotwater>9</hotwater>
+                <electricity>235</electricity>
+                <gas>9</gas>
+            </registration>
+        </flat>
+        <flat number="2" personsquantity="1" area="30">
+            <registration month="1" year="2016">
+                <coldwater>2</coldwater>
+                <hotwater>3</hotwater>
+                <electricity>60</electricity>
+                <gas>1</gas>
+            </registration>
+            <registration month="2" year="2016">
+                <coldwater>5</coldwater>
+                <hotwater>5</hotwater>
+                <electricity>127</electricity>
+                <gas>3</gas>
+            </registration>
+        </flat>
+    </building>
+    <building street="anothertreet" number="21" flatsquantity="2">
+        <flat number="1" personsquantity="1" area="50">
+            <registration month="1" year="2016">
+                <coldwater>6</coldwater>
+                <hotwater>6</hotwater>
+                <electricity>110</electricity>
+                <gas>3</gas>
+            </registration>
+            <registration month="2" year="2016">
+                <coldwater>8</coldwater>
+                <hotwater>10</hotwater>
+                <electricity>230</electricity>
+                <gas>8</gas>
+            </registration>
+        </flat>
+        <flat number="2" personsquantity="1" area="30">
+            <registration month="1" year="2016">
+                <coldwater>1</coldwater>
+                <hotwater>3</hotwater>
+                <electricity>55</electricity>
+                <gas>1</gas>
+            </registration>
+            <registration month="2" year="2016">
+                <coldwater>5</coldwater>
+                <hotwater>4</hotwater>
+                <electricity>121</electricity>
+                <gas>10</gas>
+            </registration>
+        </flat>
+    </building>
+</housekeeper>
