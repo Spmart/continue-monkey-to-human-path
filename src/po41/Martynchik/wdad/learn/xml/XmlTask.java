@@ -1,4 +1,5 @@
 package po41.Martynchik.wdad.learn.xml;
+import java.util.ArrayList;
 import java.io.File;
 import java.io.IOException;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -267,5 +268,29 @@ public class XmlTask {
                 rewriteDocument();
             }
         }
+    }
+
+    /**
+     * Задание к лабе.
+     * @param street Улица.
+     * @param buildingNumber Номер здания.
+     * @return массив квартир, в которых горячей воды вылито больше, чем холодной.
+     */
+    public ArrayList<Integer> HottestChicksHere (String street, int buildingNumber) {
+        NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME);  //Получаем все домики
+        NodeList flats = getFlatsFromBuilding(buildings, street, buildingNumber);
+        int flatsLength = flats.getLength();
+        ArrayList<Integer> hottestFlatsNumber = new ArrayList<Integer>();
+        for (int i = 0; i < flatsLength; i++) {
+            NamedNodeMap attributes = flats.item(i).getAttributes();
+            int flatNumber = Integer.valueOf(attributes.getNamedItem(NUMBER_ATTRIBUTE_NAME).getNodeValue());
+            NodeList allRegistrations = getRegistrationsFromFlat(flats, flatNumber);
+            Registrations actualRegistrations = getActualRegistrations(allRegistrations);
+            int coldWaterUsed = actualRegistrations.lastColdWaterRegistration - actualRegistrations.prevColdWaterRegistration;
+            int hotWaterUsed = actualRegistrations.lastHotWaterRegistration - actualRegistrations.prevHotWaterRegistration;
+            if (hotWaterUsed > coldWaterUsed)
+                hottestFlatsNumber.add(flatNumber);
+        }
+        return hottestFlatsNumber;
     }
 }
