@@ -58,14 +58,14 @@ public class PreferencesManager {
 
     public void setProperty(String key, String value) throws IOException, TransformerException {
         String[] tags = key.split("\\.");
-        NodeList node = appconfig.getElementsByTagName(tags[tags.length-1]);
+        NodeList node = appconfig.getElementsByTagName(tags[tags.length - 1]);
         node.item(0).setTextContent(value);
         rewriteDocument();
     }
 
     public String getProperty(String key) throws IOException{
         String[] tags = key.split("\\.");
-        NodeList node = appconfig.getElementsByTagName(tags[tags.length-1]);
+        NodeList node = appconfig.getElementsByTagName(tags[tags.length - 1]);
         return node.item(0).getTextContent();
     }
 
@@ -110,9 +110,8 @@ public class PreferencesManager {
 
     private static String getNodePath(Node node) {
         Node parent = node.getParentNode();
-        if (parent == null || parent.getNodeName().equals("#document")) { //ХЗ, что в итоге
+        if (parent == null || parent.getNodeName().equalsIgnoreCase("#appconfig")) //Думаю, это работает так
             return node.getNodeName();
-        }
         return getNodePath(parent) + '.' + node.getNodeName();
     }
 

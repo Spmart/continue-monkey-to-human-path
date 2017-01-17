@@ -12,6 +12,10 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.*;
 import org.xml.sax.SAXException;
+import po41.Martynchik.wdad.learn.rmi.Flat;
+import po41.Martynchik.wdad.learn.rmi.Building;
+import po41.Martynchik.wdad.learn.rmi.Registration;
+import java.util.Date;
 
 public class XmlTask {
     private String path = "src/PO41/Martynchik/wdad/learn/xml/housekeeper.xml";
@@ -31,20 +35,20 @@ public class XmlTask {
     private static final String TARIFF_TAG_NAME = "tariffs";
     private static final String REGISTRATION_TAG_NAME = "registration";
     //Тарифы на услуги
-    private int coldWaterTariff;
-    private int hotWaterTariff;
-    private int electricityTariff;
-    private int gasTariff;
+    private double coldWaterTariff;
+    private double hotWaterTariff;
+    private double electricityTariff;
+    private double gasTariff;
 
     private class Registrations {
-        int prevColdWaterRegistration;
-        int lastColdWaterRegistration;
-        int prevHotWaterRegistration;
-        int lastHotWaterRegistration;
-        int prevElectricityRegistration;
-        int lastElectricityRegistration;
-        int prevGasRegistration;
-        int lastGasRegistration;
+        double prevColdWaterRegistration;
+        double lastColdWaterRegistration;
+        double prevHotWaterRegistration;
+        double lastHotWaterRegistration;
+        double prevElectricityRegistration;
+        double lastElectricityRegistration;
+        double prevGasRegistration;
+        double lastGasRegistration;
 
         //Нужен для того, чтобы раскидать показания по отдельным полям
         Registrations(Node prevRegistration, Node lastRegistration) {
@@ -94,6 +98,28 @@ public class XmlTask {
         }
     }
 
+    //madness...
+    private class RegistrationValues {
+        public double coldwaterRegistration = 0;
+        public double hotwaterRegistration = 0;
+        public double electricityRegistration = 0;
+        public double gasRegistration = 0;
+    }
+
+    private RegistrationValues getRegistration(Node registrations){
+        RegistrationValues reg = new RegistrationValues();
+        NodeList coldwater = ((Element) registrations).getElementsByTagName(COLDWATER_TAG_NAME);
+        NodeList hotwater = ((Element) registrations).getElementsByTagName(HOTWATER_ATTRIBUTE_NAME);
+        NodeList electricity = ((Element) registrations).getElementsByTagName(ELECTRICITY_ATTRIBUTE_NAME);
+        NodeList gas = ((Element) registrations).getElementsByTagName(GAS_ATTRIBUTE_NAME);
+        reg.coldwaterRegistration = Integer.valueOf(coldwater.item(0).getTextContent());
+        reg.hotwaterRegistration = Integer.valueOf(hotwater.item(0).getTextContent());
+        reg.electricityRegistration = Integer.valueOf(electricity.item(0).getTextContent());
+        reg.gasRegistration = Integer.valueOf(gas.item(0).getTextContent());
+        return reg;
+    }
+    //end
+
     public XmlTask() throws IOException, ParserConfigurationException, SAXException {
         createDocument();   //Создаем дерево
     }
@@ -123,8 +149,8 @@ public class XmlTask {
     /**
      * Возвращает сумму, которую должен заплатить абонент
      */
-    public int getBill (String requiredStreet, int requiredBuildingNumber, int requiredFlatNumber) {
-        int bill = 0;   //Если что-то пойдет не так, вернем этот ноль
+    public double getBill(String requiredStreet, int requiredBuildingNumber, int requiredFlatNumber) {
+        double bill = 0;   //Если что-то пойдет не так, вернем этот ноль
         NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME);  //Получаем все домики
         NodeList flats = getFlatsFromBuilding(buildings, requiredStreet, requiredBuildingNumber);   //Получаем все квартиры из нужного нам здания
         NodeList allRegistrations = getRegistrationsFromFlat(flats, requiredFlatNumber); //Получаем все показания из нужной квартиры
@@ -134,7 +160,7 @@ public class XmlTask {
     }
 
     /**
-     * Возвращает здание по его номеру и названию улицы
+     * Возвращает все квартиры здания по его номеру и названию улицы
      */
     private NodeList getFlatsFromBuilding(NodeList buildings, String requiredStreet, int requiredBuildingNumber){
         NodeList flats = null;
@@ -204,13 +230,13 @@ public class XmlTask {
      * Подсчитывает показания, умножает на тариф и возвращает
      * количество денег, которое нужно заплатить
      */
-    private int calcBill(Registrations registrations) {
+    private double calcBill(Registrations registrations) {
         updateTariffs();
-        int coldWaterUsed = registrations.lastColdWaterRegistration - registrations.prevColdWaterRegistration;
-        int hotWaterUsed = registrations.lastHotWaterRegistration - registrations.prevHotWaterRegistration;
-        int electricityUsed = registrations.lastElectricityRegistration - registrations.prevElectricityRegistration;
-        int gasUsed = registrations.lastGasRegistration - registrations.lastGasRegistration;
-        int bill = (coldWaterUsed * coldWaterTariff + hotWaterUsed * hotWaterTariff + electricityUsed * electricityTariff + gasUsed * gasTariff);
+        double coldWaterUsed = registrations.lastColdWaterRegistration - registrations.prevColdWaterRegistration;
+        double hotWaterUsed = registrations.lastHotWaterRegistration - registrations.prevHotWaterRegistration;
+        double electricityUsed = registrations.lastElectricityRegistration - registrations.prevElectricityRegistration;
+        double gasUsed = registrations.lastGasRegistration - registrations.lastGasRegistration;
+        double bill = (coldWaterUsed * coldWaterTariff + hotWaterUsed * hotWaterTariff + electricityUsed * electricityTariff + gasUsed * gasTariff);
         return bill;
     }
 
@@ -238,7 +264,7 @@ public class XmlTask {
     /**
      * Добавляет показания счетчиков к заданной квартире в заданный период
      */
-    public void addRegistration (String street, int buildingNumber, int flatNumber, int year, int month, int coldWaterValue, int hotWaterValue, int electricityValue, int gasValue) throws IOException, TransformerException {
+    public void addRegistration (String street, int buildingNumber, int flatNumber, int year, int month, double coldWaterValue, double hotWaterValue, double electricityValue, double gasValue) throws IOException, TransformerException {
         NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME); //Получаем все домики
         NodeList flats = getFlatsFromBuilding(buildings, street, buildingNumber); //Получаем все квартирки из нужного домика
         int flatsLength = flats.getLength(); //Сколько-сколько у нас там квартирок?
@@ -286,11 +312,42 @@ public class XmlTask {
             int flatNumber = Integer.valueOf(attributes.getNamedItem(NUMBER_ATTRIBUTE_NAME).getNodeValue());
             NodeList allRegistrations = getRegistrationsFromFlat(flats, flatNumber);
             Registrations actualRegistrations = getActualRegistrations(allRegistrations);
-            int coldWaterUsed = actualRegistrations.lastColdWaterRegistration - actualRegistrations.prevColdWaterRegistration;
-            int hotWaterUsed = actualRegistrations.lastHotWaterRegistration - actualRegistrations.prevHotWaterRegistration;
+            double coldWaterUsed = actualRegistrations.lastColdWaterRegistration - actualRegistrations.prevColdWaterRegistration;
+            double hotWaterUsed = actualRegistrations.lastHotWaterRegistration - actualRegistrations.prevHotWaterRegistration;
             if (hotWaterUsed > coldWaterUsed)
                 hottestFlatsNumber.add(flatNumber);
         }
         return hottestFlatsNumber;
+    }
+
+    //another madness dirty shit
+    public Flat getFlat(Building building, int flatNumber){
+        NodeList buildings = housekeeper.getElementsByTagName(BUILDING_TAG_NAME);
+        NodeList flats = getFlatsFromBuilding(buildings, building.getStreet(), building.getNumber());
+        NodeList registrations = getRegistrationsFromFlat(flats, flatNumber);
+        int personsQuantity = 0;
+        double area = 0.0;
+        ArrayList<Registration> regs = new ArrayList();
+
+        for (int i = 0; i < flats.getLength(); i++) {
+            if (flats.item(i).getAttributes().getNamedItem(NUMBER_ATTRIBUTE_NAME).getNodeValue().equals(flatNumber)) {
+                personsQuantity = Integer.valueOf(flats.item(i).getAttributes().getNamedItem(PERSONS_QUANTITY_ATTRIBUTE_NAME).getNodeValue());
+                area = Double.valueOf(flats.item(i).getAttributes().getNamedItem(AREA_ATTRIBUTE_NAME).getNodeValue());
+            }
+        }
+
+        for (int i = 0; i < registrations.getLength(); i++) {
+            NamedNodeMap attributes = registrations.item(i).getAttributes();
+            int year = Integer.valueOf(attributes.getNamedItem(YEAR_ATTRIBUTE_NAME).getTextContent());
+            int month = Integer.valueOf(attributes.getNamedItem(MONTH_ATTRIBUTE_NAME).getTextContent());
+            Date registrationDate = null;
+            registrationDate.setYear(year);
+            registrationDate.setMonth(month);
+            RegistrationValues regValue = getRegistration(registrations.item(i));
+            Registration reg = new Registration(registrationDate, regValue.coldwaterRegistration, regValue.hotwaterRegistration, regValue.electricityRegistration, regValue.gasRegistration);
+            regs.add(reg);
+        }
+        Flat flat = new Flat(flatNumber, personsQuantity, area, regs);
+        return flat;
     }
 }

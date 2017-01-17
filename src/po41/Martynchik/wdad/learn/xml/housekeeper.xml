@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE housekeeper SYSTEM
-        "C:\Users\Spmart\Dropbox\Лабораторные работы\РВПРС на Java\wdad\src\po41\Martynchik\wdad\learn\xml\housekeeper.dtd">
+        "/Users/Spmart/IdeaProjects/continue-monkey-to-human-path/src/po41/Martynchik/wdad/learn/xml/housekeeper.dtd">
 <housekeeper>
     <tariffs coldwater="20" hotwater="50" electricity="4" gas="5"/>
     <building street="somestreet" number="40" flatsquantity="2">
@@ -33,7 +33,7 @@
             </registration>
         </flat>
     </building>
-    <building street="anothertreet" number="21" flatsquantity="2">
+    <building street="anotherstreet" number="21" flatsquantity="2">
         <flat number="1" personsquantity="1" area="50">
             <registration month="1" year="2016">
                 <coldwater>6</coldwater>
