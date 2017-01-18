@@ -6,6 +6,7 @@ import po41.Martynchik.wdad.data.managers.XmlDataManager;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.util.Date;
@@ -44,7 +45,7 @@ public class Client {
         }
     }
 
-    private static void workXmlManager(XmlDataManager xmlDataManager) {
+    private static void workXmlManager(XmlDataManager xmlDataManager) throws RemoteException {
         Building building = new Building("somestreet", 100);
         System.out.println(xmlDataManager.getBill(building, 1));
 

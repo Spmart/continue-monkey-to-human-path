@@ -2,7 +2,6 @@ package po41.Martynchik.wdad.learn.rmi;
 
 import po41.Martynchik.wdad.data.managers.PreferencesManager;
 import po41.Martynchik.wdad.utils.PreferencesConstantManager;
-
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.Remote;
@@ -13,13 +12,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
-
 import org.xml.sax.SAXException;
 
 public class Server {
     private static PreferencesManager preferencesManager;
     private static final String XML_DATA_MANAGER = "XmlDataManager";
-    private static final int XML_DATA_MANAGER_PORT = 31288;
+    private static final int XML_DATA_MANAGER_PORT = 33333;
     private static final String XML_DATA_MANAGER_PATH = "po41.Martynchik.wdad.data.managers.XmlDataMangerImpl";
 
     public static void main(String[] args) throws IOException {
@@ -50,7 +48,7 @@ public class Server {
             try {
                 System.out.println("Exporting object...");
                 XmlDataManagerImpl xmlDataManagerImpl = new XmlDataManagerImpl();
-                UnicastRemoteObject.exportObject((Remote) xmlDataManagerImpl, XML_DATA_MANAGER_PORT);
+                UnicastRemoteObject.exportObject((Remote) xmlDataManagerImpl, XML_DATA_MANAGER_PORT); //ПАДАЕТ!
                 registry.rebind(XML_DATA_MANAGER, (Remote) xmlDataManagerImpl);
                 preferencesManager.addBindedObject(XML_DATA_MANAGER, XML_DATA_MANAGER_PATH);
                 System.out.println("Waiting ... ");

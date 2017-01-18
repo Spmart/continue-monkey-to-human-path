@@ -15,7 +15,7 @@ import javax.xml.xpath.*;
 import java.util.Properties;
 
 public class PreferencesManager {
-    private static final String path = "src/PO41/Martynchik/wdad/resources/configurations/appconfig.xml";
+    private static final String path = "/Users/Spmart/IdeaProjects/continue-monkey-to-human-path/src/po41/Martynchik/wdad/resourses/configuration/appconfig.xml";
     private Document appconfig;
     private static final String CREATE_REGISTRY_TAG_NAME = "createregistry";
     private static final String REGISTRY_ADDRESS_TAG_NAME = "registryaddress";
