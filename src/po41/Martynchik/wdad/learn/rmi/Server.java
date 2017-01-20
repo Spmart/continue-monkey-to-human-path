@@ -4,7 +4,6 @@ import po41.Martynchik.wdad.data.managers.PreferencesManager;
 import po41.Martynchik.wdad.utils.PreferencesConstantManager;
 import java.io.IOException;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -17,7 +16,7 @@ import org.xml.sax.SAXException;
 public class Server {
     private static PreferencesManager preferencesManager;
     private static final String XML_DATA_MANAGER = "XmlDataManager";
-    private static final int XML_DATA_MANAGER_PORT = 33333;
+    private static final int XML_DATA_MANAGER_PORT = 32003;
     private static final String XML_DATA_MANAGER_PATH = "po41.Martynchik.wdad.data.managers.XmlDataMangerImpl";
 
     public static void main(String[] args) throws IOException {
@@ -27,10 +26,10 @@ public class Server {
             ex.printStackTrace();
         }
 
-        System.setProperty("java.rmi.server.codebase", PreferencesConstantManager.CLASS_PROVIDER);
+        //System.setProperty("java.rmi.server.codebase", PreferencesConstantManager.CLASS_PROVIDER);
         System.setProperty("java.rmi.server.UseCodeBaseOnly", preferencesManager.getProperty(PreferencesConstantManager.USE_CODE_BASE_ONLY));
         System.setProperty("java.rmi.server.logCalls", "true");
-        System.setProperty("java.security.policy", preferencesManager.getProperty(PreferencesConstantManager.POLICY_PATH));
+        System.setProperty("java.security.policy", preferencesManager.getProperty(PreferencesConstantManager.POLICY_PATH).trim());
         System.setSecurityManager(new SecurityManager());
 
         Registry registry = null;
@@ -48,8 +47,8 @@ public class Server {
             try {
                 System.out.println("Exporting object...");
                 XmlDataManagerImpl xmlDataManagerImpl = new XmlDataManagerImpl();
-                UnicastRemoteObject.exportObject((Remote) xmlDataManagerImpl, XML_DATA_MANAGER_PORT); //ПАДАЕТ!
-                registry.rebind(XML_DATA_MANAGER, (Remote) xmlDataManagerImpl);
+                UnicastRemoteObject.exportObject(xmlDataManagerImpl, XML_DATA_MANAGER_PORT); //ПАДАЕТ!
+                registry.rebind(XML_DATA_MANAGER, xmlDataManagerImpl);
                 preferencesManager.addBindedObject(XML_DATA_MANAGER, XML_DATA_MANAGER_PATH);
                 System.out.println("Waiting ... ");
                 System.out.println("Input \"exit\" to close server.");

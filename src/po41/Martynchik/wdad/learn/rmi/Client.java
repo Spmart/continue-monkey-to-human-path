@@ -27,8 +27,8 @@ public class Client {
         }
 
         System.setProperty("java.rmi.server.useCodebaseOnly", preferencesManager.getProperty(PreferencesConstantManager.USE_CODE_BASE_ONLY));
-        System.setProperty("java.rmi.server.codebase", PreferencesConstantManager.CLASS_PROVIDER);
-        System.setProperty("java.security.policy", preferencesManager.getProperty(PreferencesConstantManager.POLICY_PATH));
+        //System.setProperty("java.rmi.server.codebase", PreferencesConstantManager.CLASS_PROVIDER);
+        System.setProperty("java.security.policy", preferencesManager.getProperty(PreferencesConstantManager.POLICY_PATH).trim());
         System.setSecurityManager(new SecurityManager());
 
         Registry registry;
@@ -46,16 +46,16 @@ public class Client {
     }
 
     private static void workXmlManager(XmlDataManager xmlDataManager) throws RemoteException {
-        Building building = new Building("somestreet", 100);
+        /*
+        Building building = new Building("somestreet", 40);
         System.out.println(xmlDataManager.getBill(building, 1));
 
-        Flat flat = xmlDataManager.getFlat(building, 3);
+        Flat flat = xmlDataManager.getFlat(building, 1);
         System.out.println("flat info: number - " + flat.getNumber() + ", area - " + flat.getArea() +
                 ", personsQuantity" + flat.getPersonsQuantity());
         System.out.println("Registration : ");
         List<Registration> regs = flat.getRegistration();
         for (int i = 0; i < regs.size(); i++) {
-
             Registration reg = regs.get(i);
             System.out.println("Registration " + i + ":");
             System.out.println("date: year -" + reg.getData().getYear() + ", month" + reg.getData().getMonth());
@@ -63,7 +63,6 @@ public class Client {
             System.out.println("hot water:" + reg.getHotwater());
             System.out.println("electricity:" + reg.getElectricity());
             System.out.println("gas:" + reg.getGas());
-
         }
 
         Date registrationDate = null;
@@ -73,5 +72,8 @@ public class Client {
         Registration registration = new Registration(registrationDate, 350, 224, 150, 100);
         xmlDataManager.setTariff("gas", 110);
         xmlDataManager.addRegistration(building, 3, registration);
+        */
+        Building building = new Building("somestreet", 40);
+        System.out.println("Bill for somestreet, 40, 1: " + xmlDataManager.getBill(building, 1));
     }
 }

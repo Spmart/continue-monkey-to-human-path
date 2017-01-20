@@ -1,6 +1,8 @@
 package po41.Martynchik.wdad.learn.rmi;
 
-public class Building {
+import java.io.Serializable;
+
+public class Building implements Serializable {
     private String street;
     private int number;
 
@@ -9,7 +11,7 @@ public class Building {
         this.number = number;
     }
 
-    public String getStreet(){
+    public String getStreet() {
         return street;
     }
 

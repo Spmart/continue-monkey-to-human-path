@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<appconfig>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><appconfig>
     <rmi>
         <server>
             <registry>
@@ -7,13 +6,13 @@
                 <registryaddress>localhost</registryaddress>
                 <registryport>1099</registryport>
             </registry>
-        </server>
+        <bindedobject class="po41.Martynchik.wdad.data.managers.XmlDataMangerImpl" name="XmlDataManager"/></server>
         <client>
             <policypath>
-                /Users/Spmart/IdeaProjects/continue-monkey-to-human-path/src/po41/Martynchik/wdad/learn/rmi/client.policy
+                /Users/Spmart/IdeaProjects/continue-monkey-to-human-path/src/po41/Martynchik/wdad/learn/rmi/security.policy
             </policypath>
             <usecodebaseonly>no</usecodebaseonly>
         </client>
-        <classprovider>http://www.yourhost.free.ru/cp/cp.jar</classprovider>
+        <classprovider>/Users/Spmart/IdeaProjects/continue-monkey-to-human-path/out/production/continue-monkey-to-human-path/</classprovider>
     </rmi>
 </appconfig>

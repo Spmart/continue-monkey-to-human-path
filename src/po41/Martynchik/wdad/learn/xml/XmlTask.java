@@ -120,8 +120,20 @@ public class XmlTask {
     }
     //end
 
-    public XmlTask() throws IOException, ParserConfigurationException, SAXException {
-        createDocument();   //Создаем дерево
+    public XmlTask() {
+        try {
+            createDocument();   //Создаем дерево
+        }
+        catch (IOException ex) {
+            System.out.println("IO exception");
+        }
+        catch (ParserConfigurationException ex) {
+            System.out.println("PC exception");
+        }
+        catch (SAXException ex) {
+            System.out.println("SAX exception");
+        }
+
     }
 
     /**

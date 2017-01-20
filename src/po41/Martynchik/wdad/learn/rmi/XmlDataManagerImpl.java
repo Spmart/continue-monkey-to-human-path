@@ -9,7 +9,7 @@ import po41.Martynchik.wdad.data.managers.XmlDataManager;
 import javax.xml.transform.TransformerException;
 
 public class XmlDataManagerImpl implements XmlDataManager {
-    private XmlTask xmlTask;
+    private XmlTask xmlTask = new XmlTask();
 
     public double getBill(Building building, int flatNumber) {
         return xmlTask.getBill(building.getStreet(), building.getNumber(), flatNumber);
