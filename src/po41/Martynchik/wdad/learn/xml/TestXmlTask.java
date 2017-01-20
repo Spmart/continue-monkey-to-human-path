@@ -5,7 +5,7 @@ import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
 public class TestXmlTask {
-    public static void main(String[] args)
+    public static void testXML()
             throws IOException, TransformerException, SAXException, ParserConfigurationException {
         XmlTask workBitch = new XmlTask();
         System.out.println("Bill: " + workBitch.getBill("somestreet", 40, 1));
