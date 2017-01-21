@@ -15,4 +15,13 @@
         </client>
         <classprovider>/Users/Spmart/IdeaProjects/continue-monkey-to-human-path/out/production/continue-monkey-to-human-path/</classprovider>
     </rmi>
+    <datasource>
+        <classname>com.mysql.jdbc.jdbc2.optional.MysqlDataSource</classname>
+        <drivertype>thin</drivertype>
+        <hostName>localhost</hostName>
+        <port>8889</port>
+        <DBName>housekeeper</DBName>
+        <user>spmart</user>
+        <pass>qwerty</pass>
+    </datasource>
 </appconfig>

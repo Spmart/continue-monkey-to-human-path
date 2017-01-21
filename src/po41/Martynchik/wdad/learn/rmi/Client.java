@@ -2,22 +2,20 @@ package po41.Martynchik.wdad.learn.rmi;
 
 import po41.Martynchik.wdad.data.managers.PreferencesManager;
 import po41.Martynchik.wdad.utils.PreferencesConstantManager;
-import po41.Martynchik.wdad.data.managers.XmlDataManager;
+import po41.Martynchik.wdad.data.managers.DataManager;
 
 import java.io.IOException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Date;
-import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
 
 public class Client {
     private static PreferencesManager preferencesManager;
-    private static final String XML_DATA_MANAGER = "XmlDataManager";
+    private static final String XML_DATA_MANAGER = "DataManager";
 
     public static void main(String[] args) throws IOException {
         try {
@@ -37,7 +35,7 @@ public class Client {
                 Integer.parseInt(preferencesManager.getProperty(PreferencesConstantManager.REGISTRY_PORT)));
 
         try {
-            XmlDataManager xmlDataManager = (XmlDataManager) registry.lookup(XML_DATA_MANAGER);
+            DataManager xmlDataManager = (DataManager) registry.lookup(XML_DATA_MANAGER);
             workXmlManager(xmlDataManager);
         } catch (NotBoundException e) {
             System.err.println("Your code is shit!");
@@ -45,7 +43,7 @@ public class Client {
         }
     }
 
-    private static void workXmlManager(XmlDataManager xmlDataManager) throws RemoteException {
+    private static void workXmlManager(DataManager xmlDataManager) throws RemoteException {
         /*
         Building building = new Building("somestreet", 40);
         System.out.println(xmlDataManager.getBill(building, 1));
