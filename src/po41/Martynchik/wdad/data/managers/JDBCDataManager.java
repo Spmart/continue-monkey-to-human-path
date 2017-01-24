@@ -1,21 +1,15 @@
 package po41.Martynchik.wdad.data.managers;
 
 import po41.Martynchik.wdad.learn.rmi.Building;
-import po41.Martynchik.wdad.learn.rmi.Client;
 import po41.Martynchik.wdad.learn.rmi.Flat;
 import po41.Martynchik.wdad.learn.rmi.Registration;
 
 import java.util.*;
-import java.io.IOException;
-import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import javax.sql.DataSource;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.xml.sax.SAXException;
 
 public class JDBCDataManager implements DataManager {
     private class RegistrationValues {

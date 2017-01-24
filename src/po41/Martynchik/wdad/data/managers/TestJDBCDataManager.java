@@ -3,7 +3,6 @@ package po41.Martynchik.wdad.data.managers;
 import org.xml.sax.SAXException;
 import po41.Martynchik.wdad.data.storage.DataSourceFactory;
 import po41.Martynchik.wdad.learn.rmi.Building;
-import po41.Martynchik.wdad.learn.rmi.Client;
 import po41.Martynchik.wdad.learn.rmi.Flat;
 import po41.Martynchik.wdad.learn.rmi.Registration;
 
@@ -11,9 +10,7 @@ import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.*;
 
 public class TestJDBCDataManager {
