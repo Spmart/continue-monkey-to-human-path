@@ -25,6 +25,7 @@ public class TestJDBCDataManager {
             DataSource dataSource = DataSourceFactory.createDataSource();
             connection = dataSource.getConnection();
             jdbcDataManager = new JDBCDataManager(dataSource, connection);
+            jdbcDataManager.randomQuery();
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

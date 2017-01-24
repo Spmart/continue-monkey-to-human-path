@@ -9,6 +9,7 @@ import javax.sql.DataSource;
 import java.math.BigDecimal;
 import java.rmi.RemoteException;
 import java.sql.*;
+import java.util.StringTokenizer;
 
 public class JDBCDataManager implements DataManager {
 
@@ -45,13 +46,14 @@ public class JDBCDataManager implements DataManager {
                 }
         }
     }
-    private int execQuery(String query) {
-        String salaryAvg = "0";
+    private String execQuery(String query) {
+        String result = "0";
         try {
             statement = connection.createStatement();
             resultSet = statement.executeQuery(query);
             while(resultSet.next()) {
-                salaryAvg = resultSet.getString(1);
+                System.out.println(resultSet.getString("id"));
+                result = resultSet.getString("id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -69,7 +71,12 @@ public class JDBCDataManager implements DataManager {
                     e.printStackTrace();
                 }
         }
-        return BigDecimal.valueOf(Double.parseDouble(salaryAvg)).intValue();
+        return result;
+    }
+
+    public void randomQuery() {
+        String query = "SELECT * FROM buildings";
+        System.out.println(execQuery(query));
     }
 
     @Override
