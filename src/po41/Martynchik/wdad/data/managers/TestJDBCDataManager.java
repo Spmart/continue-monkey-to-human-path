@@ -4,14 +4,11 @@ import org.xml.sax.SAXException;
 import po41.Martynchik.wdad.data.storage.DataSourceFactory;
 import po41.Martynchik.wdad.learn.rmi.Building;
 import po41.Martynchik.wdad.learn.rmi.Flat;
-import po41.Martynchik.wdad.learn.rmi.Registration;
-
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.*;
 
 public class TestJDBCDataManager {
     public static void main(String[] args)
@@ -31,11 +28,13 @@ public class TestJDBCDataManager {
 
             double bill = jdbcDataManager.getBill(building,1); //работает
             System.out.println("Bill: " + bill);
+            /*
 
             Date date = new Date(2015, 3, 8);
             Registration registration = new Registration(date, 20, 20, 20, 20);
             jdbcDataManager.addRegistration(building, 1, registration);
             System.out.println("Показиния добавлены!");
+            */
         } catch (SQLException e) {
             e.printStackTrace();
         } catch (ClassNotFoundException e) {

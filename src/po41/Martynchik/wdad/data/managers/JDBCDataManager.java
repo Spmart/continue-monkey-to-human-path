@@ -3,7 +3,6 @@ package po41.Martynchik.wdad.data.managers;
 import po41.Martynchik.wdad.learn.rmi.Building;
 import po41.Martynchik.wdad.learn.rmi.Flat;
 import po41.Martynchik.wdad.learn.rmi.Registration;
-
 import java.util.*;
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -42,13 +41,14 @@ AND tariffs_name = tariffs.name
 LIMIT 0 , 30*/
         try (Connection connection = dataSource.getConnection()) {
             Statement statement = connection.createStatement();
+
             StringBuilder query = new StringBuilder(
                     "SELECT registrations.id, registrations.date,  `registrations-tariffs`.id,  `registrations-tariffs`.amount, tariffs.name, tariffs.cost\n" +
                             "FROM registrations,  `registrations-tariffs` , tariffs, street, buildings, flats\n" +
                             "WHERE street.name='" + building.getStreet() + "' " + "AND buildings.number='" + building.getNumber() + "' " + "AND flats.number='" + flatNumber + "' " +
                             "AND flats.id = flats_id\n" +
                             "AND registrations.id = registrations_id\n" +
-                            "AND tariffs_name = tariffs.name");
+                            "AND tariffs_name = tariffs.name" + " ORDER BY `registrations`.`date` DESC");
 
             ResultSet result = statement.executeQuery(query.toString());
             result.next();
@@ -72,6 +72,7 @@ LIMIT 0 , 30*/
             String Prevdate = result.getDate("date").toString();
             String[] pdat = date.split("-");
             Calendar prevCalendar = Calendar.getInstance();
+
             calendar.set(
                     Integer.parseInt(dat[0]),
                     Integer.parseInt(dat[1]),
@@ -115,13 +116,13 @@ AND flats.number =13
                     .append("AND buildings.number='" + building.getNumber() + "' ")
                     .append("AND flats.number='" + flatNumber + "' ");
             ResultSet result = statement.executeQuery(query.toString());
-            result.next();
-            //System.out.println(result.getInt("number"));
-            flat = new Flat(
-                    result.getInt("number"),
-                    result.getInt("persons_quantity"),
-                    result.getDouble("area"),
-                    new ArrayList<>());
+            if (result.next()) {
+                flat = new Flat(
+                        result.getInt("number"),
+                        result.getInt("persons_quantity"),
+                        result.getDouble("area"),
+                        new ArrayList<>());
+            }
         } catch (SQLException e) {
         }
         return flat;
@@ -214,6 +215,4 @@ AND flats.number =13
         dateStr.append(date.getDay());
         return dateStr.toString();
     }
-
-
 }
