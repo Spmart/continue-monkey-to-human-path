@@ -4,11 +4,11 @@ import po41.Martynchik.wdad.learn.xml.XmlTask;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import po41.Martynchik.wdad.data.managers.XmlDataManager;
+import po41.Martynchik.wdad.data.managers.DataManager;
 
 import javax.xml.transform.TransformerException;
 
-public class XmlDataManagerImpl implements XmlDataManager {
+public class XmlDataManagerImpl implements DataManager {
     private XmlTask xmlTask = new XmlTask();
 
     public double getBill(Building building, int flatNumber) {

@@ -15,7 +15,7 @@ import org.xml.sax.SAXException;
 
 public class Server {
     private static PreferencesManager preferencesManager;
-    private static final String XML_DATA_MANAGER = "XmlDataManager";
+    private static final String XML_DATA_MANAGER = "DataManager";
     private static final int XML_DATA_MANAGER_PORT = 32003;
     private static final String XML_DATA_MANAGER_PATH = "po41.Martynchik.wdad.data.managers.XmlDataMangerImpl";
 
