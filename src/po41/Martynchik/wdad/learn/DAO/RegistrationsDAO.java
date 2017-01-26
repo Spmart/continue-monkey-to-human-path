@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 public interface RegistrationsDAO {
-    public int insertRegistration (Registration registration);
+    public boolean insertRegistration (Registration registration);
     public boolean deleteRegistration (Registration registration);
     public Registration findRegistration (int id);
     public boolean updateRegistration (Registration registration);

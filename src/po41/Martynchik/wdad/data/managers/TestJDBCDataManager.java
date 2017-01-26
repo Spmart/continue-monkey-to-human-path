@@ -22,11 +22,11 @@ public class TestJDBCDataManager {
             jdbcDataManager = new JDBCDataManager(dataSource, connection);
             jdbcDataManager.setTariff("coldwater", 20); //работает
 
-            Building building = new Building("Specialistov",1);
-            Flat flat = jdbcDataManager.getFlat(building, 1);
+            Building building = new Building("Specialistov",18);
+            Flat flat = jdbcDataManager.getFlat(building, 13);
             System.out.println("Номер квартиры: " + flat.getNumber() + " Проживает: " + flat.getPersonsQuantity() + " Площадь: " + flat.getArea());
 
-            double bill = jdbcDataManager.getBill(building,1); //работает
+            double bill = jdbcDataManager.getBill(building,13); //работает
             System.out.println("Bill: " + bill);
             /*
 

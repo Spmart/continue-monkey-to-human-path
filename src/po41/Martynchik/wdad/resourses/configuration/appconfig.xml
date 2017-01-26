@@ -20,7 +20,7 @@
         <drivertype>thin</drivertype>
         <hostName>localhost</hostName>
         <port>8889</port>
-        <DBName>housekeeper</DBName>
+        <DBName>housekeeperr</DBName>
         <user>spmart</user>
         <pass>qwerty</pass>
     </datasource>

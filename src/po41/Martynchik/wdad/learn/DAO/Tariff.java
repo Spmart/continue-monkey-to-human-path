@@ -2,7 +2,7 @@ package po41.Martynchik.wdad.learn.DAO;
 
 public class Tariff {
     private String name;
-    private String cost;
+    private double cost;
 
     public String getName() {
         return name;
@@ -12,11 +12,11 @@ public class Tariff {
         this.name = name;
     }
 
-    public String getCost() {
+    public double getCost() {
         return cost;
     }
 
-    public void setCost(String cost) {
+    public void setCost(double cost) {
         this.cost = cost;
     }
 }

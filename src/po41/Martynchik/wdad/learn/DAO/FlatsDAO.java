@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 
 public interface FlatsDAO {
-    public int insertFlat (Flat flat);
+    public boolean insertFlat (Flat flat);
     public boolean deleteFlat (Flat flat);
     public Flat findFlat (int id);
     public boolean updateFlat (Flat flat);
