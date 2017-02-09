@@ -6,6 +6,8 @@ public class Flat {
     private int id;
     private int number;
     private Building building;
+    private int personsQuantity;
+    private double area;
     private Set<Registration> registrations;
 
     public int getId() {
@@ -14,6 +16,22 @@ public class Flat {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getPersonsQuantity() {
+        return personsQuantity;
+    }
+
+    public void setPersonsQuantity(int personsQuantity) {
+        this.personsQuantity = personsQuantity;
+    }
+
+    public double getArea() {
+        return area;
+    }
+
+    public void setArea(double area) {
+        this.area = area;
     }
 
     public int getNumber() {

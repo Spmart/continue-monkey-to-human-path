@@ -1,11 +1,12 @@
 package po41.Martynchik.wdad.learn.DAO;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashMap;
 
 public class Registration {
     private int id;
-    private LocalDate date;
+    private Date date;
+    private Flat flat;
     private HashMap<Tariff, Double> amounts;
 
     public int getId() {
@@ -16,11 +17,19 @@ public class Registration {
         this.id = id;
     }
 
-    public LocalDate getDate() {
+    public Flat getFlat(){
+        return flat;
+    }
+
+    public void setFlat(Flat flat){
+        this.flat = flat;
+    }
+
+    public Date getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(Date date) {
         this.date = date;
     }
 

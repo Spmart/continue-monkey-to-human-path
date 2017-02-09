@@ -1,20 +1,31 @@
 package po41.Martynchik.wdad.learn.DAO;
 
-import org.xml.sax.SAXException;
-import po41.Martynchik.wdad.data.storage.DataSourceFactory;
+
+import java.sql.Connection;
+import java.util.Collection;
+import javax.sql.DataSource;
+
+import po41.Martynchik.wdad.data.storage.*;
 
 import java.io.IOException;
-import java.util.*;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import javax.sql.DataSource;
-import javax.xml.parsers.ParserConfigurationException;
 import java.sql.SQLException;
-import java.util.Collection;
+import java.sql.Statement;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Set;
+import javax.xml.parsers.ParserConfigurationException;
 
+import org.xml.sax.SAXException;
+
+/**
+ * @author 000
+ */
 public class BuildingsDAOImpl implements BuildingsDAO {
-    private DataSource dataSource = null; //К - костыли. Так и живем...
+    private DataSource dataSource = null;
 
     public BuildingsDAOImpl() {
         try {
@@ -28,250 +39,211 @@ public class BuildingsDAOImpl implements BuildingsDAO {
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
-
     }
 
-    @Override
     public boolean insertBuilding(Building building) {
-        try {
+        if (building != null) {
             try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM street WHERE name = ?");
-                statement.setString(1, building.getStreetName());
-                ResultSet result = statement.executeQuery();
-                int streetId = 0;
-                if (result.first()) {
-                    streetId = result.getInt("id");
-                }
-
-                statement = connection.prepareStatement("INSERT INTO buildings (number, street_id) VALUES(?, ?)");
-                statement.setInt(1, building.getNumber());
-                statement.setInt(2, streetId);
-
-                for (Flat flat : building.getFlats()) {
-                    statement = connection.prepareStatement("INSERT INTO flats (number, buildings_id) VALUES(?, ?)");
-                    statement.setInt(1, flat.getNumber());
-                    statement.setInt(2, building.getId());
-                    statement.executeUpdate();
-
-                    for (Registration registration : flat.getRegistrations()) {
-                        statement = connection.prepareStatement("INSERT INTO registrations (date, flats_id) VALUES(?, ?)");
-                        statement.setDate(1, java.sql.Date.valueOf(registration.getDate()));
-                        statement.setInt(2, flat.getId());
-
-                        for (Map.Entry<Tariff, Double> amount : registration.getAmounts().entrySet()) {
-                            statement = connection.prepareStatement(
-                                    "INSERT INTO registrations_tariffs (amount, registrations_id,tariffs_name) VALUES(?,?,?)");
-                            statement.setDouble(1, amount.getValue());
-                            statement.setInt(2, registration.getId());
-                            statement.setString(3, amount.getKey().getName());
+                Statement statement = connection.createStatement();
+                StringBuilder getStreetId = new StringBuilder("Select * From street Where name = '" + building.getStreetName() + "'");
+                ResultSet result = statement.executeQuery(getStreetId.toString());
+                if (result.next()) {
+                    int streetId = result.getInt("id");
+                    StringBuilder addBuilding = new StringBuilder(
+                            "INSERT INTO buildings (id,number,street_id) VALUES ('" + building.getId() + "','" + building.getNumber() + "','" + streetId + "')");
+                    statement.executeUpdate(addBuilding.toString());
+                    if (building.getFlats() != null)
+                        for (Flat flats : building.getFlats()) {
+                            FlatsDAOImpl insertFlats = new FlatsDAOImpl();
+                            insertFlats.saveOrUpdateFlat(flats);
                         }
-                    }
+
                 }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return false;
             }
+        }
+        return true;
+    }
+
+    public boolean deleteBuilding(Building building) {
+        
+        /* "Select * From street Where street_name = '"+ building.street+"'"
+            int streetId = result.getInt("id");
+            "SET foreign_key_checks = 0;
+            DELETE From buildings Where number ='" + building.number+"' AND street_id ='"+ streetId+"'" 
+        */
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            if (building.getFlats() != null)
+                for (Flat flats : building.getFlats()) {
+                    FlatsDAOImpl deleteFlats = new FlatsDAOImpl();
+                    deleteFlats.deleteFlat(flats);
+                }
+            StringBuilder query = new StringBuilder(" DELETE From buildings Where id = '" + building.getId() + "'");
+            statement.executeUpdate(query.toString());
+
         } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
         return true;
     }
 
-
-    @Override
     public Building findBuilding(int id) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement(
-                        "SELECT * FROM buildings INNER JOIN street ON buildings.street_id = street.id WHERE buildings.id =?");
+        Building building = new Building();
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            StringBuilder getBuilding = new StringBuilder("Select * From buildings Where id ='" + id + "'");
+            ResultSet result = statement.executeQuery(getBuilding.toString());
+            result.next();
+            int buildingNumber = result.getInt("number");
+            int streetId = result.getInt("street_id");
+            StringBuilder getStreet = new StringBuilder("SELECT * FROM `street` WHERE `id` ='" + streetId + "'");
+            ResultSet resultStreet = statement.executeQuery(getStreet.toString());
+            resultStreet.next();
+            building.setId(id);
+            building.setNumber(buildingNumber);
+            building.setStreetName(resultStreet.getString("name"));
+            building.setFlats(getFlats(connection, building));
 
-                statement.setInt(1, id);
-                ResultSet result = statement.executeQuery();
-                if (result.first()) {
-                    Building building = new Building();
-                    building.setId(result.getInt("id"));
-                    building.setNumber(result.getInt("number"));
-                    building.setStreetName(result.getString("name"));
-                    building.setFlats(getFlats(connection, building));
-                    return building;
-                }
-                return null;
-            }
+
         } catch (SQLException e) {
-            return null;
+            e.printStackTrace();
         }
+        return building;
     }
 
-    @Override
     public boolean updateBuilding(Building building) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement(
-                        "UPDATE buildings SET number=? WHERE id=?");
-                statment.setDouble(1, building.getNumber());
-                statment.setInt(2, building.getId());
-                statment.executeUpdate();
-
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            StringBuilder getStreetId = new StringBuilder("Select * From street Where name = '" + building.getStreetName() + "'");
+            ResultSet result = statement.executeQuery(getStreetId.toString());
+            result.next();
+            int streetId = result.getInt("id");
+            StringBuilder updateBuilding = new StringBuilder("UPDATE buildings SET number='" + building.getNumber() + "', street_id='"
+                    + streetId + "' WHERE id='" + building.getId() + "'");
+            statement.executeUpdate(updateBuilding.toString());
+            if (building.getFlats() != null)
                 for (Flat flat : building.getFlats()) {
-                    statment = connection.prepareStatement(
-                            "UPDATE flats SET number=?,buildings_id=? WHERE id=?");
-                    statment.setDouble(1, flat.getNumber());
-                    statment.setInt(2, flat.getBuilding().getId());
-                    statment.setInt(3, flat.getId());
-                    statment.executeUpdate();
-
-                    for (Registration registration : flat.getRegistrations()) {
-                        statment = connection.prepareStatement(
-                                "UPDATE registrations SET date=? WHERE id=?");
-                        statment.setInt(1, registration.getId());
-                        statment.executeUpdate();
-
-                        for (Map.Entry<Tariff, Double> amount : registration.getAmounts().entrySet()) {
-                            statment = connection.prepareStatement(
-                                    "UPDATE registrations_tariffs SET amount=? VALUES(?,?)"
-                                            + " WHERE tariffs_name=?");
-                            statment.setDouble(1, amount.getValue());
-                            statment.setString(2, amount.getKey().getName());
-                            statment.executeUpdate();
-                        }
-                    }
+                    FlatsDAOImpl update = new FlatsDAOImpl();
+                    update.saveOrUpdateFlat(flat);
                 }
-            }
         } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
         return true;
     }
 
-    @Override
     public boolean saveOrUpdateBuilding(Building building) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement(
-                        "SELECT * FROM buildings,street WHERE id=? OR (number=? AND buildings.street_id=street.id)");
-                statment.setInt(1, building.getId());
-                statment.setInt(2, building.getNumber());
-                boolean result = statment.execute();
-                if (!result) {
-                    return updateBuilding(building);
-                } else {
-                    return insertBuilding(building);
-                }
+        try (Connection connection = dataSource.getConnection()) {
+            Statement statement = connection.createStatement();
+            StringBuilder buildings = new StringBuilder("SELECT id FROM buildings WHERE id='" + building.getId() + "'");
+            ResultSet result = statement.executeQuery(buildings.toString());
+            if (result.next()) {
+                return updateBuilding(building);
+            } else {
+                return insertBuilding(building);
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             return false;
         }
+
     }
 
-    @Override
     public Collection<Building> findBuildings(String streetName) {
         Collection<Building> buildings = new LinkedList<>();
         try {
             try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM street WHERE name=?");
-                statement.setString(1, streetName);
+                Statement statement = connection.createStatement();
+                StringBuilder getStreetId = new StringBuilder("SELECT * FROM street WHERE name='" + streetName + "'");
+                ResultSet result = statement.executeQuery(getStreetId.toString());
+                if (result.next()) {
+                    int streetId = result.getInt("id");
 
-                ResultSet result = statement.executeQuery();
-                int streetId = -1;
-                if (result.first())
-                    streetId = result.getInt("id");
 
-                if (streetId != -1) {
-                    statement = connection.prepareStatement("SELECT * FROM buildings WHERE street_id=?");
-                    statement.setInt(1, streetId);
-                    while (result.next()) {
+                    StringBuilder getBuildings = new StringBuilder("SELECT * FROM buildings WHERE street_id='" + streetId + "'");
+                    ResultSet resultBuildings = statement.executeQuery(getBuildings.toString());
+                    while (resultBuildings.next()) {
                         Building building = new Building();
-                        building.setId(result.getInt("id"));
-                        building.setNumber(result.getInt("number"));
-                        building.setStreetName(result.getString("name"));
+                        building.setId(resultBuildings.getInt("id"));
+                        building.setNumber(resultBuildings.getInt("number"));
+                        building.setStreetName(streetName);
                         building.setFlats(getFlats(connection, building));
                         buildings.add(building);
                     }
                 }
             }
         } catch (SQLException e) {
+            e.printStackTrace();
             return null;
         }
         return buildings;
     }
 
-    public boolean deleteBuilding(Building building) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement("DELETE FROM buildings WHERE id=?");
-                statment.setInt(1, building.getId());
-                statment.executeUpdate();
-            }
-        } catch (SQLException e) {
-            return false;
-        }
-        return true;
-    }
-
-    private LinkedHashSet<Flat> getFlats(Connection connection, Building building) throws SQLException {
-        PreparedStatement statment = connection.prepareStatement("SELECT * FROM flats WHERE buildings.id =?");
-        statment.setInt(1, building.getId());
-        ResultSet flatsResult = statment.executeQuery();
+    public LinkedHashSet<Flat> getFlats(Connection connection, Building building) throws SQLException {
         LinkedHashSet<Flat> flats = new LinkedHashSet<>();
-        while (flatsResult.next()) {
+        Statement statement = connection.createStatement();
+        StringBuilder getFlats = new StringBuilder("SELECT * FROM flats WHERE buildings_id='" + building.getId() + "'");
+        ResultSet result = statement.executeQuery(getFlats.toString());
+        while (result.next()) {
             Flat flat = new Flat();
+            flat.setArea(result.getDouble("area"));
             flat.setBuilding(building);
-            flat.setId(flatsResult.getInt("id"));
-            flat.setNumber(flatsResult.getInt("number"));
-            flat.setRegistrations(getRegistration(connection, flat));
+            flat.setId(result.getInt("id"));
+            flat.setNumber(result.getInt("number"));
+            flat.setPersonsQuantity(result.getInt("persons_quantity"));
+            flat.setRegistrations(getRegistrations(connection, flat));
             flats.add(flat);
         }
         return flats;
     }
 
-
-    private LinkedHashSet<Registration> getRegistration(Connection connection, Flat flat) throws SQLException {
-        LinkedHashSet<Registration> registrations = null;
-        PreparedStatement statment = connection.prepareStatement("SELECT * FROM registrations WHERE flats_id=?");
-        statment.setInt(1, flat.getId());
-        ResultSet result = statment.executeQuery();
+    public LinkedHashSet<Registration> getRegistrations(Connection connection, Flat flat) throws SQLException {
+        Statement statement = connection.createStatement();
+        LinkedHashSet<Registration> registrations = new LinkedHashSet<>();
+        StringBuilder getRegistrations = new StringBuilder("SELECT * FROM registrations WHERE flats_id='" + flat.getId() + "'");
+        ResultSet result = statement.executeQuery(getRegistrations.toString());
         while (result.next()) {
+            String date = result.getDate("date").toString();
+            String[] data = date.split("-");
+            Date regDate = new Date();
+            regDate.setYear(Integer.parseInt(data[0]));
+            regDate.setMonth(Integer.parseInt(data[1]));
+            regDate.setDate(Integer.parseInt(data[2]));
             Registration registration = new Registration();
-            registration.setDate(result.getDate("date").toLocalDate());
+            registration.setDate(regDate);
             registration.setId(result.getInt("id"));
-
-            HashMap<Tariff, Double> amounts = getAmounts(connection, registration.getId());
-            registration.setAmounts(amounts);
+            registration.setFlat(flat);
+            registration.setAmounts(getAmounts(connection, registration.getId()));
             registrations.add(registration);
         }
         return registrations;
     }
 
-    private HashMap<Tariff, Double> getAmounts(Connection connection, int registrationId) throws SQLException {
+    public HashMap<Tariff, Double> getAmounts(Connection connection, int registrationId) throws SQLException {
+        Statement statement = connection.createStatement();
         HashMap<Tariff, Double> amounts = new HashMap<>();
-        HashMap<String, Tariff> tarrifs = findTariffs();
-        PreparedStatement statment = connection.prepareStatement(
-                "SELECT * FROM registrations-tariffs WHERE registrations_id=?");
-        statment.setInt(1, registrationId);
-        ResultSet tarrifsResult = statment.executeQuery();
-
-        while (tarrifsResult.next()) {
-            amounts.put(
-                    tarrifs.get(tarrifsResult.getString("tariffs_name")),
-                    tarrifsResult.getDouble("amount"));
+        StringBuilder getRegistrationTariff = new StringBuilder("SELECT * FROM `registrations-tariffs` WHERE registrations_id='" + registrationId + "'");
+        ResultSet resultRegistrationTariff = statement.executeQuery(getRegistrationTariff.toString());
+        while (resultRegistrationTariff.next()) {
+            Tariff tariff = new Tariff();
+            tariff.setName(resultRegistrationTariff.getString("tariffs_name"));
+            tariff.setCost(getCost(connection, tariff.getName()));
+            amounts.put(tariff, resultRegistrationTariff.getDouble("amount"));
         }
         return amounts;
     }
 
-    private HashMap<String, Tariff> findTariffs() {
-        HashMap<String, Tariff> tariffs = new HashMap<>();
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement("SELECT * FROM tarrifs");
-
-                ResultSet result = statement.executeQuery();
-                while (result.next()) {
-                    Tariff tarrif = new Tariff();
-                    tarrif.setName(result.getString("name"));
-                    tarrif.setCost(result.getDouble("cost"));
-                    tariffs.put(tarrif.getName(), tarrif);
-                }
-            }
-        } catch (SQLException e) {
-            return null;
-        }
-        return tariffs;
+    public Double getCost(Connection connection, String name) throws SQLException {
+        Statement statement = connection.createStatement();
+        StringBuilder getCost = new StringBuilder("SELECT cost FROM tariffs WHERE name='" + name + "'");
+        ResultSet result = statement.executeQuery(getCost.toString());
+        result.next();
+        return result.getDouble("cost");
     }
+
 }

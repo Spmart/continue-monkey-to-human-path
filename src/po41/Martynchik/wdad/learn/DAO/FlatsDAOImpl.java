@@ -1,28 +1,33 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package po41.Martynchik.wdad.learn.DAO;
 
+import po41.Martynchik.wdad.data.storage.DataSourceFactory;
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.Collection;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.sql.Statement;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
+import java.util.LinkedList;
+import java.util.Set;
 import javax.sql.DataSource;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.xml.sax.SAXException;
-import po41.Martynchik.wdad.learn.DAO.*;
-import po41.Martynchik.wdad.data.storage.DataSourceFactory;
 
+/**
+ *
+ * @author 000
+ */
 public class FlatsDAOImpl implements FlatsDAO {
-    private DataSource dataSource;
-
-    public FlatsDAOImpl() {
+     private DataSource dataSource= null;
+   
+    public FlatsDAOImpl(){
         try {
             dataSource = DataSourceFactory.createDataSource();
         } catch (IOException e) {
@@ -35,182 +40,165 @@ public class FlatsDAOImpl implements FlatsDAO {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public boolean insertFlat(Flat flat) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement(
-                        "INSERT INTO flats (number,buildings_id) VALUES(?,?)");
-                statment.setInt(1, flat.getId());
-                statment.setInt(2, flat.getBuilding().getId());
-                statment.executeUpdate();
-
-                for (Registration registration : flat.getRegistrations()) {
-                    statment = connection.prepareStatement(
-                            "INSERT INTO registrations (date, flats_id) VALUES(?, ?)");
-                    statment.setDate(1, java.sql.Date.valueOf(registration.getDate()));
-                    statment.setInt(2, flat.getId());
-
-                    for (Map.Entry<Tariff, Double> amount : registration.getAmounts().entrySet()) {
-                        statment = connection.prepareStatement(
-                                "INSERT INTO registrations_tariffs (amount, registrations_id,tariffs_name) VALUES(?,?,?)");
-                        statment.setDouble(1, amount.getValue());
-                        statment.setInt(2, registration.getId());
-                        statment.setString(3, amount.getKey().getName());
-                    }
-                }
-            }
-        } catch (SQLException e) {
+    public boolean insertFlat (Flat flat){
+        try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                StringBuilder addFlat = new StringBuilder("INSERT INTO flats(id, number, buildings_id, persons_quantity, area) VALUES ('"+
+                                flat.getId()+"','"+flat.getNumber()+"','"+flat.getBuilding().getId()+"','"
+                        +flat.getPersonsQuantity()+"','"+flat.getArea()+"')");
+                        statement.executeUpdate(addFlat.toString());
+                        if (flat.getRegistrations()!= null)
+                        for (Registration registrations: flat.getRegistrations()){
+                            RegistrationsDAOImpl insertRegistration = new RegistrationsDAOImpl();
+                            insertRegistration.saveOrUpdateRegistration(registrations);
+                        }
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+                 return false;
+             }
+        
+        return true;
+    }
+    public boolean deleteFlat (Flat flat){
+        try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                if (flat.getRegistrations()!= null)
+                 for (Registration registrations: flat.getRegistrations()){
+                            RegistrationsDAOImpl deleteRegistration = new RegistrationsDAOImpl();
+                            deleteRegistration.deleteRegistration(registrations);
+                        }
+                    StringBuilder query = new StringBuilder(" DELETE From flats Where id = '" + flat.getId()+
+                            "'");
+                    statement.executeUpdate(query.toString());
+                   
+        }
+        catch (SQLException e){
+            e.printStackTrace();
             return false;
         }
         return true;
     }
-
-    @Override
-    public boolean deleteFlat(Flat flat) {
-//        try{
-//            try (Connection connection = dataSource.getConnection()) {
-//                PreparedStatement statment = connection.prepareStatement(
-//                        "DELETE FROM registrations-tarrifs WHERE registrations_id='?'");
-//                statment.setInt(1,registration.getId());
-//                statment.executeUpdate();
-//
-//                statment = connection.prepareStatement(
-//                        "DELETE FROM registrations WHERE id='?'");
-//                statment.setInt(1,registration.getId());
-//                statment.executeUpdate();
-//            }
-//        }catch (SQLException e){
-//            return false;
-//        }
-        return true;
-    }
-
-    @Override
-    public Flat findFlat(int id) {
-        Flat flat = null;
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statement = connection.prepareStatement(
-                        "SELECT * FROM flats WHERE id =?");
-                statement.setInt(1, id);
-                ResultSet result = statement.executeQuery();
-
-                if (result.first()) {
-                    flat = new Flat();
+    public Flat findFlat (int id){
+         try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                    StringBuilder query = new StringBuilder("SELECT * FROM flats WHERE id='" + id +"'");
+                    ResultSet result = statement.executeQuery(query.toString());
+                    result.next();
+                    
+                    BuildingsDAOImpl building = new BuildingsDAOImpl();
+                    Flat flat = new Flat();
+                    flat.setArea(result.getDouble("area"));
+                    flat.setBuilding(building.findBuilding(result.getInt("buildings_id")));
                     flat.setId(id);
                     flat.setNumber(result.getInt("number"));
-                    flat.setRegistrations(getRegistration(connection, flat));
-                }
-            }
-        } catch (SQLException e) {
+                    flat.setPersonsQuantity(result.getInt("persons_quantity"));
+                    flat.setRegistrations(getRegistrations(connection, flat));
+                     
+                    return flat;
+        }
+        catch (SQLException e){
+            e.printStackTrace();
             return null;
         }
-        return flat;
+        
     }
-
-    @Override
-    public boolean updateFlat(Flat flat) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement(
-                        "UPDATE flats SET number=?,buildings_id=? WHERE id=?");
-                statment.setDouble(1, flat.getNumber());
-                statment.setInt(2, flat.getBuilding().getId());
-                statment.setInt(3, flat.getId());
-                statment.executeUpdate();
-
-                for (Registration registration : flat.getRegistrations()) {
-                    statment = connection.prepareStatement("UPDATE registrations SET date=? WHERE id=?");
-                    statment.setInt(1, registration.getId());
-                    statment.executeUpdate();
-                    for (Map.Entry<Tariff, Double> amount : registration.getAmounts().entrySet()) {
-                        statment = connection.prepareStatement(
-                                "UPDATE registrations_tariffs SET amount=? VALUES(?,?)"
-                                        + " WHERE tariffs_name=?");
-                        statment.setDouble(1, amount.getValue());
-                        statment.setString(2, amount.getKey().getName());
-                        statment.executeUpdate();
-                    }
+    public boolean updateFlat (Flat flat){
+        try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                StringBuilder updateBuilding = new StringBuilder("UPDATE flats SET number='"+flat.getNumber()+"', buildings_id='"
+                        +flat.getBuilding().getId()+"', persons_quantity='"+flat.getPersonsQuantity()+"', area='"+flat.getArea()
+                        +"' WHERE id='"+flat.getId()+"'");
+                statement.executeUpdate(updateBuilding.toString());
+                if (flat.getRegistrations()!= null)
+                for (Registration registrations: flat.getRegistrations()){
+                    RegistrationsDAOImpl update = new RegistrationsDAOImpl();
+                    update.saveOrUpdateRegistration(registrations);
                 }
-            }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e){
+            e.printStackTrace();
             return false;
         }
-        return true;
+       return true;
     }
-
-    @Override
-    public boolean saveOrUpdateFlat(Flat flat) {
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement("SELECT * FROM flats WHERE id=?");
-                boolean result = statment.execute();
-                if (!result) {
+    public boolean saveOrUpdateFlat (Flat flat){
+         try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                StringBuilder flats = new StringBuilder("SELECT id FROM flats WHERE id='"+flat.getId()+"'");
+                ResultSet result = statement.executeQuery(flats.toString());
+                if(result.next()){
                     return updateFlat(flat);
-                } else {
+                }
+                else {
                     return insertFlat(flat);
                 }
-            }
-        } catch (SQLException e) {
+        }
+        catch (SQLException e){
+            e.printStackTrace();
             return false;
         }
     }
-
-    @Override
-    public Collection<Flat> findFlatsByLastRegistrationDate(LocalDate regDate) {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public Collection<Flat> findFlatsByLastRegistrationDate (Date regDate){
+        Collection<Flat> flats = new LinkedList();
+        try (Connection connection = dataSource.getConnection()) {
+                Statement statement = connection.createStatement();
+                StringBuilder flatsByLastRegistration = new StringBuilder("SELECT * FROM registrations WHERE date='"+regDate.getYear()+"-"+
+                        regDate.getMonth()+"-"+regDate.getDate()+"'");
+                ResultSet result = statement.executeQuery(flatsByLastRegistration.toString());
+                while (result.next()){
+                    Flat flat = findFlat(result.getInt("flats_id"));
+                    flats.add(flat);
+                }
+                
+        }
+        catch (SQLException e){
+            e.printStackTrace();
+           return null;
+        }
+        return flats;
     }
-
-    private LinkedHashSet<Registration> getRegistration(Connection connection, Flat flat) throws SQLException {
-        LinkedHashSet<Registration> registrations = null;
-        PreparedStatement statment = connection.prepareStatement("SELECT * FROM registrations WHERE flats_id=?");
-        statment.setInt(1, flat.getId());
-        ResultSet result = statment.executeQuery();
-        while (result.next()) {
+    
+    public Set<Registration> getRegistrations(Connection connection, Flat flat) throws SQLException{
+        Statement statement = connection.createStatement();
+        Set<Registration> registrations = null;
+        StringBuilder getRegistrations = new StringBuilder("SELECT * FROM registratons WHERE flats_id='"+flat.getId()+"'");
+        ResultSet result = statement.executeQuery(getRegistrations.toString());
+        while(result.next()){
+            String date = result.getDate("date").toString();
+                String[] data = date.split("-");
+                Date regDate = new Date();
+                regDate.setYear(Integer.parseInt(data[0]));
+                regDate.setMonth(Integer.parseInt(data[1]));
+                regDate.setDate(Integer.parseInt(data[2]));
             Registration registration = new Registration();
-            registration.setDate(result.getDate("date").toLocalDate());
+            registration.setDate(regDate);
             registration.setId(result.getInt("id"));
-            HashMap<Tariff, Double> amounts = getAmounts(connection, registration.getId());
-            registration.setAmounts(amounts);
+            registration.setFlat(flat);
+            registration.setAmounts(getAmounts(connection, registration.getId()));
             registrations.add(registration);
         }
         return registrations;
     }
-
-
-    private HashMap<Tariff, Double> getAmounts(Connection connection, int registrationId) throws SQLException {
+    
+    public HashMap<Tariff, Double> getAmounts(Connection connection, int registrationId) throws SQLException{
+        Statement statement = connection.createStatement();
         HashMap<Tariff, Double> amounts = new HashMap<>();
-        HashMap<String, Tariff> tarrifs = findTariffs();
-        PreparedStatement statment = connection.prepareStatement(
-                "SELECT * FROM registrations-tariffs WHERE registrations_id=?");
-        statment.setInt(1, registrationId);
-        ResultSet tarrifsResult = statment.executeQuery();
-        while (tarrifsResult.next()) {
-            amounts.put(
-                    tarrifs.get(tarrifsResult.getString("tariffs_name")),
-                    tarrifsResult.getDouble("amount"));
+        StringBuilder getRegistrationTariff = new StringBuilder("SELECT * FROM `registrations-tariffs` WHERE registrations_id='"+registrationId+"'");
+        ResultSet resultRegistrationTariff = statement.executeQuery(getRegistrationTariff.toString());
+        while (resultRegistrationTariff.next()){
+            Tariff tariff = new Tariff();
+            tariff.setName(resultRegistrationTariff.getString("tariffs_name"));
+            tariff.setCost(getCost(connection, tariff.getName()));
+            amounts.put(tariff, resultRegistrationTariff.getDouble("amount"));
         }
         return amounts;
     }
-
-    private HashMap<String, Tariff> findTariffs() {
-        HashMap<String, Tariff> tariffs = new HashMap<>();
-        try {
-            try (Connection connection = dataSource.getConnection()) {
-                PreparedStatement statment = connection.prepareStatement("SELECT * FROM tarrifs");
-                ResultSet result = statment.executeQuery();
-                while (result.next()) {
-                    Tariff tarrif = new Tariff();
-                    tarrif.setName(result.getString("name"));
-                    tarrif.setCost(result.getDouble("cost"));
-                    tariffs.put(tarrif.getName(), tarrif);
-                }
-            }
-        } catch (SQLException e) {
-            return null;
-        }
-        return tariffs;
+    
+    public Double getCost(Connection connection, String name) throws SQLException{
+        Statement statement = connection.createStatement();
+        StringBuilder getCost = new StringBuilder("SELECT cost FROM tariffs WHERE name='"+name+"'");
+        ResultSet result = statement.executeQuery(getCost.toString());
+        return result.getDouble("cost");
     }
 }
